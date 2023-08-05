@@ -9,4 +9,14 @@ router.get("/isValidWalletAddress/:address", (req, res) => {
   res.json({ isValid });
 });
 
+router.get("/createWallet", (req, res) => {
+  const wallet = ethersService.createWallet();
+  res.json(wallet);
+});
+
+router.get("/getLatestTransactions", async (req, res) => {
+  const transactions = await ethersService.getLatestTransactions();
+  res.json(transactions);
+});
+
 module.exports = router;
