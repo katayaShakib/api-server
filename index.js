@@ -1,4 +1,7 @@
 const express = require('express');
+const swaggerUi = require('swagger-ui-express');
+/* const swaggerDocument = require('./swaggerDoc'); */
+const specs = require('./swaggerDef');
 
 const app = express();
 const ethersController = require('./controllers/ethersController');
@@ -8,7 +11,7 @@ const PORT = 3000;
 
 app.use(express.json());
 
-// Use ethersController and ccxtController
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 app.use('/ethers', ethersController);
 app.use('/ccxt', ccxtController);
 
