@@ -1,5 +1,7 @@
 require("dotenv").config({ path: ".env" });
 const { ethers } = require("ethers");
+const EthereumTransaction = require("../entities/EthereumTransaction");
+const EthereumTransactionRepository = require("../repositories/ethereumTransactionRepository");
 
 // Check if the provided wallet address is valid
 function isValidWalletAddress(address) {
@@ -23,10 +25,17 @@ function createWallet() {
 // Get the latest 1000 Ethereum transactions with specified data
 async function getLatestTransactions() {
   try {
+    // Delete all existing Ethereum transactions from the database
+    try {
+      await EthereumTransactionRepository.deleteAll();
+    } catch (error) {
+      console.error("Error deleting existing Ethereum transactions:", error);
+    }
+
     const url = process.env.PROVIDER_URL;
     const provider = new ethers.JsonRpcProvider(url);
     const blockNumber = await provider.getBlockNumber();
-    const batchSize = 1; //1000 needs a paid pro provider subscription
+    const batchSize = 200;
     const startBlock = blockNumber - batchSize + 1;
     const endBlock = blockNumber;
 
@@ -58,7 +67,34 @@ async function getLatestTransactions() {
     // Sort transactions by etherium quantity (descending order)
     transactions.sort((a, b) => b.amountTransferred - a.amountTransferred);
 
-    return transactions;
+    // Save Ethereum transactions to the database using the repository
+    for (const transactionData of transactions) {
+      const ethereumTransaction = new EthereumTransaction(
+        transactionData.transactionHash,
+        transactionData.senderAddress,
+        transactionData.receiverAddress,
+        transactionData.amountTransferred,
+        transactionData.blockNumber
+      );
+
+      try {
+        await EthereumTransactionRepository.save(ethereumTransaction);
+      } catch (error) {
+        console.error(
+          "Error saving Ethereum transaction to the database:",
+          error
+        );
+        throw new Error(
+          "Failed to save Ethereum transactions to the database."
+        );
+      }
+    }
+
+    // Get the latest 1000 Ethereum transactions from the database using the repository
+    const latestTransactions =
+      await EthereumTransactionRepository.getLatestTransactions();
+
+    return latestTransactions;
   } catch (error) {
     console.error("Error fetching transactions:", error);
     throw new Error("Failed to fetch Ethereum transactions.");

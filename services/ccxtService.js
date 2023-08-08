@@ -1,17 +1,53 @@
-// src/services/ccxtService.js
-
 const ccxt = require("ccxt");
-
-// Instantiate the Binance exchange object
-const binanceExchange = new ccxt.binance();
+const BinanceTradableCoin = require("../entities/BinanceTradableCoin");
+const BinanceTradableCoinRepository = require("../repositories/binanceTradableCoinRepository");
 
 // Get the list of tradable coins on Binance
 async function getTradableCoins() {
   try {
-    const markets = await binanceExchange.loadMarkets();
-    const tradableCoins = Object.keys(markets);
+    // Delete all existing Binance tradable coins from the database
+    try {
+      await BinanceTradableCoinRepository.deleteAll();
+    } catch (error) {
+      console.error("Error deleting existing Binance tradable coins:", error);
+    }
 
-    return tradableCoins;
+    // Fetch the list of tradable coins from CCXT
+    const exchange = new ccxt.binance();
+    const markets = await exchange.fetchMarkets();
+    let counter = 0;
+    // Save Binance tradable coins and their average prices to the database using the repository
+    for (const market of markets) {
+      if (counter > 99) {
+        break;
+      }
+      const symbol = market.symbol;
+      const trades = await exchange.fetchTrades(symbol, undefined, 100); // Fetch the last 100 trades
+
+      if (trades.length === 0) continue; // Skip coins with no recent trades
+
+      // Calculate the average price based on the last 100 trades
+      const totalPrice = trades.reduce((sum, trade) => sum + trade.price, 0);
+      const averagePrice = totalPrice / trades.length;
+
+      const binanceTradableCoin = new BinanceTradableCoin(symbol, averagePrice);
+
+      try {
+        await BinanceTradableCoinRepository.save(binanceTradableCoin);
+      } catch (error) {
+        console.error(
+          "Error saving Binance tradable coin to the database:",
+          error
+        );
+      }
+
+      counter++;
+    }
+
+    // Get all tradable coins from the database using the repository
+    const allTradableCoins =
+      await BinanceTradableCoinRepository.getAllTradableCoins();
+    return allTradableCoins;
   } catch (error) {
     console.error("Error fetching tradable coins:", error);
     throw new Error("Failed to fetch tradable coins.");
@@ -19,19 +55,13 @@ async function getTradableCoins() {
 }
 
 // Get the average price of 100 recent transactions for a specific coin
-async function getAveragePrice(coinSymbol) {
+async function getAveragePrice() {
   try {
-    const ohlcvData = await binanceExchange.fetchOHLCV(
-      `${coinSymbol}/USDT`,
-      "1m",
-      undefined,
-      100
-    );
-    const averagePrice =
-      ohlcvData.reduce((total, [, close]) => total + close, 0) /
-      ohlcvData.length;
+    // Get all tradable coins from the database using the repository
+    const listWithAveragePrices =
+      await BinanceTradableCoinRepository.getListWithAveragePrices();
 
-    return averagePrice;
+    return listWithAveragePrices;
   } catch (error) {
     console.error("Error fetching average price:", error);
     throw new Error("Failed to fetch average price.");
