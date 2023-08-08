@@ -1,6 +1,6 @@
-const ccxt = require("ccxt");
-const BinanceTradableCoin = require("../entities/BinanceTradableCoin");
-const BinanceTradableCoinRepository = require("../repositories/binanceTradableCoinRepository");
+const ccxt = require('ccxt');
+const BinanceTradableCoin = require('../entities/BinanceTradableCoin');
+const BinanceTradableCoinRepository = require('../repositories/binanceTradableCoinRepository');
 
 // Get the list of tradable coins on Binance
 async function getTradableCoins() {
@@ -9,7 +9,7 @@ async function getTradableCoins() {
     try {
       await BinanceTradableCoinRepository.deleteAll();
     } catch (error) {
-      console.error("Error deleting existing Binance tradable coins:", error);
+      console.error('Error deleting existing Binance tradable coins:', error);
     }
 
     // Fetch the list of tradable coins from CCXT
@@ -21,7 +21,7 @@ async function getTradableCoins() {
       if (counter > 99) {
         break;
       }
-      const symbol = market.symbol;
+      const { symbol } = market;
       const trades = await exchange.fetchTrades(symbol, undefined, 100); // Fetch the last 100 trades
 
       if (trades.length === 0) continue; // Skip coins with no recent trades
@@ -36,8 +36,8 @@ async function getTradableCoins() {
         await BinanceTradableCoinRepository.save(binanceTradableCoin);
       } catch (error) {
         console.error(
-          "Error saving Binance tradable coin to the database:",
-          error
+          'Error saving Binance tradable coin to the database:',
+          error,
         );
       }
 
@@ -45,12 +45,11 @@ async function getTradableCoins() {
     }
 
     // Get all tradable coins from the database using the repository
-    const allTradableCoins =
-      await BinanceTradableCoinRepository.getAllTradableCoins();
+    const allTradableCoins = await BinanceTradableCoinRepository.getAllTradableCoins();
     return allTradableCoins;
   } catch (error) {
-    console.error("Error fetching tradable coins:", error);
-    throw new Error("Failed to fetch tradable coins.");
+    console.error('Error fetching tradable coins:', error);
+    throw new Error('Failed to fetch tradable coins.');
   }
 }
 
@@ -58,13 +57,12 @@ async function getTradableCoins() {
 async function getAveragePrice() {
   try {
     // Get all tradable coins from the database using the repository
-    const listWithAveragePrices =
-      await BinanceTradableCoinRepository.getListWithAveragePrices();
+    const listWithAveragePrices = await BinanceTradableCoinRepository.getListWithAveragePrices();
 
     return listWithAveragePrices;
   } catch (error) {
-    console.error("Error fetching average price:", error);
-    throw new Error("Failed to fetch average price.");
+    console.error('Error fetching average price:', error);
+    throw new Error('Failed to fetch average price.');
   }
 }
 

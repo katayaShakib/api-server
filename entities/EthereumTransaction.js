@@ -4,7 +4,7 @@ class EthereumTransaction {
     senderAddress,
     receiverAddress,
     amountTransferred,
-    blockNumber
+    blockNumber,
   ) {
     this.transactionHash = transactionHash;
     this.senderAddress = senderAddress;

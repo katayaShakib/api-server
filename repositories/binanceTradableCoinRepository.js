@@ -1,4 +1,4 @@
-const db = require("../database");
+const db = require('../database');
 
 class BinanceTradableCoinRepository {
   static async save(binanceTradableCoin) {
@@ -14,8 +14,8 @@ class BinanceTradableCoinRepository {
       ]);
     } catch (error) {
       console.error(
-        "Error saving Binance tradable coin to the database:",
-        error
+        'Error saving Binance tradable coin to the database:',
+        error,
       );
     }
   }
@@ -30,10 +30,10 @@ class BinanceTradableCoinRepository {
       return allTradableCoins;
     } catch (error) {
       console.error(
-        "Error fetching Binance tradable coins from the database:",
-        error
+        'Error fetching Binance tradable coins from the database:',
+        error,
       );
-      throw new Error("Failed to fetch Binance tradable coins.");
+      throw new Error('Failed to fetch Binance tradable coins.');
     }
   }
 
@@ -47,20 +47,20 @@ class BinanceTradableCoinRepository {
       return await db.all(query);
     } catch (error) {
       console.error(
-        "Error fetching Binance tradable coins from the database:",
-        error
+        'Error fetching Binance tradable coins from the database:',
+        error,
       );
-      throw new Error("Failed to fetch Binance tradable coins.");
+      throw new Error('Failed to fetch Binance tradable coins.');
     }
   }
 
   static async deleteAll() {
     try {
-      const query = `DELETE FROM binance_tradable_coins`;
+      const query = 'DELETE FROM binance_tradable_coins';
       await db.run(query);
     } catch (error) {
-      console.error("Error deleting all Binance tradable coins:", error);
-      throw new Error("Failed to delete all Binance tradable coins.");
+      console.error('Error deleting all Binance tradable coins:', error);
+      throw new Error('Failed to delete all Binance tradable coins.');
     }
   }
 }
