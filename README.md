@@ -14,7 +14,7 @@ The transaction data:
 - amount of ether transferred
 - block number
 
-### 2. cctx
+### 2. ccxt
 
 1. Get the list of coins which are tradable on Binance.
 2. Get the list of each coin’s average price(**Average price of 100 recent transactions)**
