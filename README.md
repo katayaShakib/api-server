@@ -22,7 +22,8 @@ The transaction data:
 ## Usage
 1. Download the project
 2. Open a terminal at the projet's location
-3. npm install
-4. node createTables.js //if tables do not exist
-5. npm start
-6. You can visit `/api-docs` route for api documentation UI
+3. `npm install`
+4. Copy `.env.example` file to a new file and name it `.env`, and fill in the required variables/keys.
+5. node createTables.js //if tables do not exist
+6. `npm start`
+7. You can visit `/api-docs` route for api documentation UI
